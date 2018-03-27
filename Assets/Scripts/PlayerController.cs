@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour {
 	public float speed;
 	public Text countText;
-	public Text winText;
+	public float jumpForce;
 
 	private bool onGround;
 	private Rigidbody rb;
@@ -17,7 +18,6 @@ public class PlayerController : MonoBehaviour {
 		count = 0;
 		onGround = true;
 		SetCountText ();
-		winText.text = "";
 	}
 	void FixedUpdate(){
 		float moveHorizontal = Input.GetAxis ("Horizontal");
@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour {
 		rb.AddForce (movement * speed);
 		if (Input.GetKeyDown (KeyCode.Space) && onGround == true) {
 			PlayerJump ();
+		}
+		if (gameObject.transform.position.y < -10) {
+			SceneManager.LoadScene ("MiniGame");
 		}
 	}
 
@@ -43,16 +46,22 @@ public class PlayerController : MonoBehaviour {
 			onGround = true;
 		}
 	}
+	void OnCollisionExit(Collision col){
+		if (col.gameObject.CompareTag ("Ground") || col.gameObject.CompareTag ("Wall")) {
+			onGround = false;
+		}
+	}
+
 	void SetCountText(){
 		countText.text = "Coins: " + count.ToString ();
-		if (count >= 12){
-			winText.text = "You Win";
+		if (count >= 35){
+			SceneManager.LoadScene ("Win Scene");
 		}
 	}
 	void PlayerJump(){
-			Vector3 jump = new Vector3(0.0f,300.0f,0.0f);
-			rb.AddForce (jump);
-			onGround = false;
+		Vector3 jump = new Vector3(0.0f,jumpForce,0.0f);
+		rb.AddForce (jump * jumpForce);
+		onGround = false;
 	}
 }
 
